@@ -7,6 +7,7 @@ function App() {
   const [board, setBoard] = useState(["", "", "", "", "", "", "", "", ""]); // total 9 squares in the board
   const [player, setPlayer] = useState("O");
   const [result, setResult] = useState({winner: "none", state: "none"});
+  const [score, setScore] = useState({playerO: 0, playerX: 0});
 
   useEffect(() => {
     checkIfTie();
@@ -22,11 +23,12 @@ function App() {
   useEffect(() => {
     if(result.state != "none"){
       alert(`Game Finished! Winning Player: ${result.winner}`);
-      restartGame();
+      //restartGame();
     }
   }, [result]);
 
   const chooseSquare = (square) => {
+    if(result.state == "Won")  return;
     setBoard(board.map((val, index) => {
       if(index == square && val == "")
         return player;
@@ -42,6 +44,7 @@ function App() {
       // game will end in the beginning
       // since the squares were all set to empty
       if(firstPlayer == "") return;      
+      if(result.state == "Won")  return;
       
       // assume found a winning pattern
       let foundWinningPattern = true;
@@ -54,11 +57,16 @@ function App() {
 
       if(foundWinningPattern){
         setResult({winner: player, state: "Won"})
+        if(player == "X")
+          setScore({playerO: score.playerO, playerX: score.playerX + 1});
+        else
+          setScore({playerO: score.playerO + 1, playerX: score.playerX});
       }
     })
   };
 
   const checkIfTie = () => {
+    if(result.state == "Won" || result.state == "Tie")  return;
     // assume the board was all filled
     let filled = true;
     board.forEach((square) => {
@@ -73,11 +81,36 @@ function App() {
 
   const restartGame = () => {
     setBoard(["", "", "", "", "", "", "", "", ""]); 
-    setPlayer("X");
+    setPlayer("O");
+    setResult({winner: "none", state: "none"});
+  }
+
+  const resetGame = () => {
+    setBoard(["", "", "", "", "", "", "", "", ""]); 
+    setPlayer("O");
+    setResult({winner: "none", state: "none"});
+    setScore({playerO: 0, playerX: 0});
   }
 
   return (
     <div className="App">
+      <div className="io">
+        <div className="button" onClick={restartGame}>
+          Restart
+        </div>
+        <div className="button" onClick={resetGame}>
+          Reset
+        </div>
+        <div className="score">
+          <div className="Oscore">
+          Player O: {score.playerO}
+          </div>  
+          <div className="Xscore">
+          Player X: {score.playerX}
+          </div>
+        </div>
+      </div>
+
       <div className="board">
         <div className="row">
           <Square 
